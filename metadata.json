@@ -1,0 +1,6 @@
+{
+  "name": "PakGym Pro",
+  "description": "Comprehensive Gym Management System with trainer booking, attendance tracking, fee management, and AI-powered workout plans tailored for the Pakistani market.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

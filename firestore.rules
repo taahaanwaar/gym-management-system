@@ -1,0 +1,127 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function getStaffData() {
+      return get(/databases/$(database)/documents/staff/$(request.auth.uid)).data;
+    }
+
+    function isStaff() {
+      return isSignedIn() && exists(/databases/$(database)/documents/staff/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return isStaff() && getStaffData().role == 'Admin';
+    }
+
+    function isManager() {
+      return isStaff() && (getStaffData().role == 'Manager' || getStaffData().role == 'Admin');
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Helper for data shape
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 1. Staff Rules
+    match /staff/{userId} {
+      function isValidStaff(data) {
+        return data.fullName is string && data.fullName.size() <= 100 &&
+               data.email is string && data.email.size() <= 100 &&
+               data.role in ['Admin', 'Manager', 'Staff', 'Trainer'] &&
+               data.branchId is string &&
+               (!('hireDate' in data) || data.hireDate is string);
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isStaff();
+      
+      // Allow self-registration
+      allow create: if isOwner(userId) && isValidStaff(incoming());
+      
+      allow update: if (isOwner(userId) || isAdmin()) && isValidStaff(incoming()) && 
+                    (isAdmin() || (incoming().role == existing().role && incoming().email == existing().email));
+      allow delete: if isAdmin();
+    }
+
+    // 2. Member Rules
+    match /members/{memberId} {
+      function isValidMember(data) {
+        return data.fullName is string && data.fullName.size() <= 100 &&
+               data.phone is string && data.phone.size() <= 20 &&
+               data.branchId is string;
+      }
+
+      allow get: if isStaff() || isOwner(memberId);
+      allow list: if isStaff();
+      allow create, update: if isStaff() && isValidMember(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 3. Gym Branch Rules
+    match /gyms/{gymId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // 4. Membership Plans
+    match /plans/{planId} {
+      allow read: if isSignedIn();
+      allow write: if isManager();
+    }
+
+    // 5. Transactions
+    match /transactions/{txId} {
+      allow read, write: if isStaff();
+    }
+
+    // 6. Attendance
+    match /attendance/{atId} {
+      allow read: if isStaff() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn(); // Allow members to check in? 
+      allow update, delete: if isStaff();
+    }
+
+    // 7. Workout Plans
+    match /workout_plans/{planId} {
+      allow read: if isStaff() || (isSignedIn() && resource.data.memberId == request.auth.uid);
+      allow write: if isStaff();
+    }
+
+    // 8. Trainers
+    match /trainers/{trainerId} {
+      allow read: if isSignedIn();
+      allow write: if isManager();
+    }
+    
+    match /classes/{classId} {
+      allow read: if isSignedIn();
+      allow write: if isManager();
+    }
+  }
+}

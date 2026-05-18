@@ -1,0 +1,198 @@
+{
+  "entities": {
+    "Gym": {
+      "title": "Gym Branch",
+      "description": "Information about a specific gym location.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "phone": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "address", "city"]
+    },
+    "Member": {
+      "title": "Gym Member",
+      "description": "Profiling information for gym members.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "cnic": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
+        "bloodGroup": { "type": "string" },
+        "admissionDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Active", "Inactive", "Suspended"] },
+        "branchId": { "type": "string" },
+        "currentPlanId": { "type": "string" },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "emergencyContact": { "type": "string" },
+        "profileImageUrl": { "type": "string" }
+      },
+      "required": ["fullName", "phone", "branchId", "admissionDate", "status"]
+    },
+    "MembershipPlan": {
+      "title": "Membership Plan",
+      "description": "Different subscription options for members.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "durationMonths": { "type": "number" },
+        "price": { "type": "number" },
+        "benefits": { "type": "string" },
+        "branchId": { "type": "string" }
+      },
+      "required": ["name", "durationMonths", "price", "branchId"]
+    },
+    "Transaction": {
+      "title": "Fee Transaction",
+      "description": "Records of fee collections and other payments.",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "month": { "type": "string" },
+        "year": { "type": "number" },
+        "paymentType": { "type": "string", "enum": ["Cash", "Online", "Bank Transfer"] },
+        "transactionType": { "type": "string", "enum": ["Admission", "Monthly Fee", "Personal Training"] },
+        "receiptId": { "type": "string" },
+        "branchId": { "type": "string" }
+      },
+      "required": ["memberId", "amount", "date", "transactionType", "branchId"]
+    },
+    "Attendance": {
+      "title": "Attendance Record",
+      "description": "Check-in and check-out tracking.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userRole": { "type": "string", "enum": ["Member", "Staff", "Trainer"] },
+        "date": { "type": "string", "format": "date" },
+        "checkInTime": { "type": "string", "format": "date-time" },
+        "checkOutTime": { "type": "string", "format": "date-time" },
+        "branchId": { "type": "string" }
+      },
+      "required": ["userId", "date", "checkInTime", "branchId"]
+    },
+    "Trainer": {
+      "title": "Trainer profile",
+      "description": "Details of gym trainers.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "specialties": { "type": "string" },
+        "availability": { "type": "string" },
+        "branchId": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["name", "phone", "branchId"]
+    },
+    "Class": {
+      "title": "Gym Class",
+      "description": "Scheduled group sessions.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "trainerId": { "type": "string" },
+        "trainerName": { "type": "string" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "days": { "type": "array" },
+        "branchId": { "type": "string" }
+      },
+      "required": ["name", "trainerId", "startTime", "days", "branchId"]
+    },
+    "Staff": {
+      "title": "Staff Record",
+      "description": "Information about gym employees.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "role": { "type": "string", "enum": ["Admin", "Manager", "Staff", "Trainer"] },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "salary": { "type": "number" },
+        "hireDate": { "type": "string", "format": "date-time" },
+        "branchId": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["fullName", "role", "branchId"]
+    },
+    "WorkoutPlan": {
+      "title": "AI Workout Plan",
+      "description": "Generated fitness plans for members.",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string" },
+        "planContent": { "type": "string" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "goal": { "type": "string" },
+        "preferences": { "type": "string" }
+      },
+      "required": ["memberId", "planContent", "generatedAt"]
+    },
+    "Report": {
+      "title": "Business Report",
+      "description": "Aggregated business metrics.",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "data": { "type": "object" },
+        "period": { "type": "string" },
+        "branchId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "data", "branchId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "gyms": {
+      "schema": "Gym",
+      "description": "Collection of gym branches."
+    },
+    "members": {
+      "schema": "Member",
+      "description": "Collection of gym members across all branches."
+    },
+    "plans": {
+      "schema": "MembershipPlan",
+      "description": "Collection of membership plans."
+    },
+    "transactions": {
+      "schema": "Transaction",
+      "description": "Financial records of receipts and payments."
+    },
+    "attendance": {
+      "schema": "Attendance",
+      "description": "Log of user attendance."
+    },
+    "trainers": {
+      "schema": "Trainer",
+      "description": "Directory of gym trainers."
+    },
+    "classes": {
+      "schema": "Class",
+      "description": "Schedule of workout classes."
+    },
+    "staff": {
+      "schema": "Staff",
+      "description": "Gym employee database."
+    },
+    "workout_plans": {
+      "schema": "WorkoutPlan",
+      "description": "AI-generated workout routines."
+    },
+    "reports": {
+      "schema": "Report",
+      "description": "Business insights and analytics snapshots."
+    }
+  }
+}
